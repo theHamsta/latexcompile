@@ -66,7 +66,10 @@ pub struct LatexRunOptions {
 
 impl LatexRunOptions {
     pub fn new() -> Self {
-        Self { double_compilation: false capture_stdout: true }
+        Self {
+            double_compilation: false,
+            capture_stdout: true,
+        }
     }
 }
 
@@ -325,9 +328,9 @@ impl LatexCompiler {
         assert!(options.capture_stdout);
 
         // first and second run
-        self.get_cmd(main).out().map_err(LatexError::Io)?;
+        let _err_code = self.get_cmd(main).output().map_err(LatexError::Io)?;
         if options.double_compilation {
-            self.get_cmd(main).status().map_err(LatexError::Io)?;
+            let _err_code = self.get_cmd(main).output().map_err(LatexError::Io)?;
         }
 
         // get the output file

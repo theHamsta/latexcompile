@@ -66,7 +66,7 @@ pub struct LatexRunOptions {
 
 impl LatexRunOptions {
     pub fn new() -> Self {
-        Self { double_compilation=false capture_stdout=true }
+        Self { double_compilation: false capture_stdout: true }
     }
 }
 

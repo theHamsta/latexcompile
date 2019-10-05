@@ -298,7 +298,7 @@ impl LatexCompiler {
         cmd
     }
 
-    pub fn run(&self, main: &str, input: &LatexInput) -> Result<Vec<u8>> {
+    pub fn run(&self, main: &str, input: &LatexInput, double_compilation: bool) -> Result<Vec<u8>> {
         // check if input is empty
         if input.input.is_empty() {
             return Err(LatexError::LatexError("No input files provided.".into()));
@@ -313,7 +313,9 @@ impl LatexCompiler {
 
         // first and second run
         self.get_cmd(main).status().map_err(LatexError::Io)?;
-        self.get_cmd(main).status().map_err(LatexError::Io)?;
+        if double_compilation {
+            self.get_cmd(main).status().map_err(LatexError::Io)?;
+        }
 
         // get the output file
         let mut pdf = PathBuf::from(main); //self.get_result_path(PathBuf::from(main))?;

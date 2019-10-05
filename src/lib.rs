@@ -59,6 +59,17 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 use tempfile::{tempdir, TempDir};
 
+pub struct LatexRunOptions {
+    double_compilation: bool,
+    capture_stdout: bool,
+}
+
+impl LatexRunOptions {
+    pub fn new() -> Self {
+        Self { double_compilation=false capture_stdout=true }
+    }
+}
+
 /// Specify all error cases with the fail api.
 #[derive(Fail, Debug)]
 pub enum LatexError {
@@ -298,7 +309,7 @@ impl LatexCompiler {
         cmd
     }
 
-    pub fn run(&self, main: &str, input: &LatexInput, double_compilation: bool) -> Result<Vec<u8>> {
+    pub fn run(&self, main: &str, input: &LatexInput, options: LatexRunOptions) -> Result<Vec<u8>> {
         // check if input is empty
         if input.input.is_empty() {
             return Err(LatexError::LatexError("No input files provided.".into()));
@@ -311,9 +322,11 @@ impl LatexCompiler {
             fs::write(path, transformed_buf).map_err(LatexError::Io)?;
         }
 
+        assert!(options.capture_stdout);
+
         // first and second run
-        self.get_cmd(main).status().map_err(LatexError::Io)?;
-        if double_compilation {
+        self.get_cmd(main).out().map_err(LatexError::Io)?;
+        if options.double_compilation {
             self.get_cmd(main).status().map_err(LatexError::Io)?;
         }
 

@@ -1,3 +1,4 @@
+**This is a fork of latexcompile with small adaptions for my package** [faster-beamer](https://github.com/theHamsta/faster-beamer)
 
 # latexcompile
 

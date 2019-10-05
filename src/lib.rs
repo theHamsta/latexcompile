@@ -466,7 +466,7 @@ mod tests {
     fn test_pdf_generation() {
         let compiler = LatexCompiler::new(HashMap::new()).unwrap();
         let input = LatexInput::from("assets");
-        let pdf = compiler.run("assets/main.tex", &input);
+        let pdf = compiler.run("assets/main.tex", &input, LatexRunOptions::new());
         assert!(pdf.is_ok());
     }
 
@@ -474,8 +474,8 @@ mod tests {
     fn test_pdf_generation_second() {
         let compiler = LatexCompiler::new(HashMap::new()).unwrap();
         let input = LatexInput::from("assets");
-        let pdf = compiler.run("assets/card.tex", &input);
+        let pdf = compiler.run("assets/card.tex", &input, LatexRunOptions::new());
         assert!(pdf.is_ok());
-        fs::write("card.pdf", pdf.unwrap());
+        fs::write("card.pdf", pdf.unwrap()).expect("Failed to write PDF");
     }
 }

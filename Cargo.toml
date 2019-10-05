@@ -1,13 +1,13 @@
 [package]
-name = "latexcompile"
-description = "The is a small wrapper around pdflatex oder some other command."
-repository = "https://github.com/santifa/latexcompile.git"
+name = "latexcompile_fasterbeamer"
+description = "The is a small wrapper around pdflatex oder some other command with adaption for usage with faster-beamer"
+repository = "https://github.com/theHamsta/latexcompile.git"
 keywords = ["latex", "wrapper"]
 categories = ["template engine"]
 readme = "README.md"
 license-file = "LICENSE"
 version = "0.1.0"
-authors = ["Henrik Jürges <juerges.henrik@gmail.com>"]
+authors = ["Henrik Jürges <juerges.henrik@gmail.com>", "Stephan Seitz <stephan.seitz@fau.de>"]
 edition = "2018"
 exclude = ["assets/*"]
 

@@ -52,8 +52,6 @@ use failure;
 #[macro_use]
 extern crate failure_derive;
 
-use regex::Regex;
-use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
@@ -233,57 +231,9 @@ impl<'a> From<&'a str> for LatexInput {
     }
 }
 
-/// Internal type alias for the key value store
-type TemplateDict = HashMap<String, String>;
-
 /// The processor takes latex files as input and replaces
 /// matching placeholders (e.g. ##someVar##) with the real
 /// content provided as HashMap.
-struct TemplateProcessor {
-    regex: Regex,
-}
-
-impl TemplateProcessor {
-    /// Characters allowed as variable names: "a-zAZ0-9-_"
-    fn new() -> Result<TemplateProcessor> {
-        Ok(TemplateProcessor {
-            regex: Regex::new(r"##[a-z|A-Z|\d|-|_]+##").or(Err(LatexError::TemplateError(
-                "Failed to compile regex.".to_string(),
-            )))?,
-        })
-    }
-
-    /// Replace placeholders with their actual value or nothing if no replacement
-    /// is provided. The content is duplicated within this step.
-    fn process_placeholders(&self, buf: &[u8], dict: &TemplateDict) -> Result<Vec<u8>> {
-        if dict.is_empty() {
-            return Ok(buf.into());
-        }
-        let mut replaced = String::new();
-        let content = String::from_utf8_lossy(buf);
-
-        let mut running_index = 0;
-        for c in self.regex.captures_iter(&content) {
-            let _match = c.get(0).unwrap();
-            let key = &content[_match.start() + 2.._match.end() - 2];
-            replaced += &content[running_index.._match.start()];
-
-            match dict.get(key) {
-                Some(value) => {
-                    replaced += value;
-                }
-                None => {}
-            }
-            running_index = _match.end();
-        }
-        if running_index > 0 {
-            replaced += &content[running_index..];
-            Ok(replaced.as_bytes().to_vec())
-        } else {
-            Ok(buf.into())
-        }
-    }
-}
 
 /// The wrapper struct around some latex compiler.
 /// It provides a clean temporary enviroment for the
@@ -303,21 +253,17 @@ impl TemplateProcessor {
 pub struct LatexCompiler {
     pub working_dir: PathBuf,
     cmd: Cmd,
-    tp: TemplateProcessor,
-    dict: TemplateDict,
 }
 
 impl LatexCompiler {
     /// Create a new latex compiler wrapper
-    pub fn new(dict: TemplateDict) -> Result<LatexCompiler> {
+    pub fn new() -> Result<LatexCompiler> {
         let dir = tempdir().map_err(LatexError::Io)?;
         let cmd = ("pdflatex".into(), vec!["-interaction=nonstopmode".into()]);
 
         Ok(LatexCompiler {
             working_dir: dir.path().to_path_buf(),
             cmd: cmd,
-            tp: TemplateProcessor::new()?,
-            dict: dict,
         })
     }
 

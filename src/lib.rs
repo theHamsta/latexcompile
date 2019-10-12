@@ -187,17 +187,12 @@ impl LatexInput {
 
     pub fn add_folder_lazy(&mut self, folder: PathBuf, dest_path: &Path) -> Result<()> {
         if folder.is_dir() {
-            dbg!(&dest_path);
-            dbg!(&folder);
             let dest_folder = dest_path.join(format!("./{}", &folder.to_str().unwrap()));
-            dbg!(&dest_folder);
             if !&dest_folder.exists() {
-                dbg!(&dest_folder.parent());
                 match &dest_folder.parent() {
                     Some(p) => fs::create_dir_all(p).map_err(LatexError::Io)?,
                     None => (),
                 }
-                dbg!(&dest_folder.parent());
                 let _result =
                     ::symlink::symlink_dir(folder, dest_folder).map_err(LatexError::Io)?;
             }
@@ -213,10 +208,8 @@ impl LatexInput {
         for path in paths {
             let p = path.map_err(LatexError::Input)?.path();
             if p.is_file() {
-                dbg!(&p);
                 input.add_file_lazy(p, dest_path)?;
             } else if p.is_dir() {
-                dbg!(&p);
                 input.add_folder_lazy(p, dest_path)?;
             }
         }

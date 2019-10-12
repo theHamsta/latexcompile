@@ -173,7 +173,7 @@ impl LatexInput {
 
     pub fn add_file_lazy(&mut self, file: PathBuf, dest_path: &Path) -> Result<()> {
         if file.is_file() {
-            let dest_file = dest_path.join(&file);
+            let dest_file = dest_path.join(".").join(&file);
             if !&dest_file.exists() {
                 match &dest_file.parent() {
                     Some(p) => fs::create_dir_all(p).map_err(LatexError::Io)?,
@@ -189,7 +189,7 @@ impl LatexInput {
         if folder.is_dir() {
             dbg!(&dest_path);
             dbg!(&folder);
-            let dest_folder = dest_path.join(&folder);
+            let dest_folder = dest_path.join(".").join(&folder);
             dbg!(&dest_folder);
             if !&dest_folder.exists() {
                 dbg!(&dest_folder.parent());

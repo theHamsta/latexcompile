@@ -200,17 +200,20 @@ impl LatexInput {
     }
 
     #[allow(unused_must_use)]
-    pub fn from_lazy(s: &str, dest_path: &Path) -> LatexInput {
+    pub fn from_lazy(s: &str, dest_path: &Path) -> Result<LatexInput> {
         let mut input = LatexInput::new();
         let path = PathBuf::from(s);
-        if !dest_path.join(&path).exists() {
-            if path.is_file() {
-                input.add_file_lazy(path, dest_path);
-            } else if path.is_dir() {
-                input.add_folder_lazy(path, dest_path);
+        let paths = fs::read_dir(path).map_err(LatexError::Input)?;
+
+        for path in paths {
+            let p = path.map_err(LatexError::Input)?.path();
+            if p.is_file() {
+                input.add_file_lazy(p, dest_path);
+            } else if p.is_dir() {
+                input.add_folder_lazy(p, dest_path);
             }
         }
-        input
+        Ok(input)
     }
 }
 

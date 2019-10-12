@@ -357,17 +357,12 @@ impl LatexCompiler {
         cmd
     }
 
-    pub fn run(&self, main: &str, input: &LatexInput, options: LatexRunOptions) -> Result<PathBuf> {
-
-        // apply the templating and create resources in the working dir
-        for (name, buf) in &input.input {
-            let path = self.get_result_path(PathBuf::from(name))?;
-            if !path.exists() {
-                let transformed_buf = self.tp.process_placeholders(buf, &self.dict)?;
-                fs::write(path, transformed_buf).map_err(LatexError::Io)?;
-            }
-        }
-
+    pub fn run(
+        &self,
+        main: &str,
+        _input: &LatexInput,
+        options: LatexRunOptions,
+    ) -> Result<PathBuf> {
         assert!(options.capture_stdout);
 
         // first and second run
@@ -380,17 +375,6 @@ impl LatexCompiler {
         let pdf = PathBuf::from(main); //self.get_result_path(PathBuf::from(main))?;
         let stem = PathBuf::from(pdf.file_stem().unwrap().to_str().unwrap());
         Ok(self.working_dir.join(stem.with_extension("pdf")))
-    }
-
-    /// Create the given path as subpath within the working directory.
-    fn get_result_path(&self, path: PathBuf) -> Result<PathBuf> {
-        let dir = &self.working_dir;
-        let to_create = dir.join(path);
-        match to_create.parent() {
-            Some(p) => fs::create_dir_all(p).map_err(LatexError::Io)?,
-            None => (),
-        }
-        Ok(to_create)
     }
 }
 

@@ -179,7 +179,7 @@ impl LatexInput {
                     Some(p) => fs::create_dir_all(p).map_err(LatexError::Io)?,
                     None => (),
                 }
-                let _result = ::symlink::symlink_file(file, dest_file);
+                let _result = ::symlink::symlink_file(file, dest_file).expect("nooO");
             }
         }
         Ok(())
@@ -193,7 +193,7 @@ impl LatexInput {
                     Some(p) => fs::create_dir_all(p).map_err(LatexError::Io)?,
                     None => (),
                 }
-                let _result = ::symlink::symlink_dir(folder, dest_folder);
+                let _result = ::symlink::symlink_dir(folder, dest_folder).expect("nooO");
             }
         }
         Ok(())

@@ -193,13 +193,13 @@ impl LatexInput {
                     Some(p) => fs::create_dir_all(p).map_err(LatexError::Io)?,
                     None => (),
                 }
-                let _result = ::symlink::symlink_dir(folder, dest_folder).map_err(LatexError::Io)?;
+                let _result =
+                    ::symlink::symlink_dir(folder, dest_folder).map_err(LatexError::Io)?;
             }
         }
         Ok(())
     }
 
-    #[allow(unused_must_use)]
     pub fn from_lazy(s: &str, dest_path: &Path) -> Result<LatexInput> {
         let mut input = LatexInput::new();
         let path = PathBuf::from(s);
@@ -208,9 +208,9 @@ impl LatexInput {
         for path in paths {
             let p = path.map_err(LatexError::Input)?.path();
             if p.is_file() {
-                input.add_file_lazy(p, dest_path);
+                input.add_file_lazy(p, dest_path)?;
             } else if p.is_dir() {
-                input.add_folder_lazy(p, dest_path);
+                input.add_folder_lazy(p, dest_path)?;
             }
         }
         Ok(input)

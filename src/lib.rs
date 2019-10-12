@@ -187,6 +187,7 @@ impl LatexInput {
 
     pub fn add_folder_lazy(&mut self, folder: PathBuf, dest_path: &Path) -> Result<()> {
         if folder.is_dir() {
+            dbg!(&dest_path);
             dbg!(&folder);
             let dest_folder = dest_path.join(&folder);
             dbg!(&dest_folder);

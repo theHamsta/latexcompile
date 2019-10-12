@@ -173,14 +173,13 @@ impl LatexInput {
 
     pub fn add_file_lazy(&mut self, file: PathBuf, dest_path: &Path) -> Result<()> {
         if file.is_file() {
-            match file.to_str() {
-                Some(name) => {
-                    if !dest_path.join(&file).exists() {
-                        let content = fs::read(&file).map_err(LatexError::Input)?;
-                        self.input.push((name.to_string(), content));
-                    }
+            let dest_file = dest_path.join(&file);
+            if !&dest_file.exists() {
+                match &dest_file.parent() {
+                    Some(p) => fs::create_dir_all(p).map_err(LatexError::Io)?,
+                    None => (),
                 }
-                None => {}
+                let _result = ::symlink::symlink_file(file, dest_file);
             }
         }
         Ok(())
@@ -188,15 +187,13 @@ impl LatexInput {
 
     pub fn add_folder_lazy(&mut self, folder: PathBuf, dest_path: &Path) -> Result<()> {
         if folder.is_dir() {
-            let paths = fs::read_dir(folder).map_err(LatexError::Input)?;
-
-            for path in paths {
-                let p = path.map_err(LatexError::Input)?.path();
-                if p.is_file() {
-                    self.add_file_lazy(p, dest_path)?;
-                } else if p.is_dir() {
-                    self.add_folder_lazy(p, dest_path)?;
+            let dest_folder = dest_path.join(&folder);
+            if !&dest_folder.exists() {
+                match &dest_folder.parent() {
+                    Some(p) => fs::create_dir_all(p).map_err(LatexError::Io)?,
+                    None => (),
                 }
+                let _result = ::symlink::symlink_dir(folder, dest_folder);
             }
         }
         Ok(())

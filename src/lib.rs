@@ -358,10 +358,6 @@ impl LatexCompiler {
     }
 
     pub fn run(&self, main: &str, input: &LatexInput, options: LatexRunOptions) -> Result<PathBuf> {
-        // check if input is empty
-        if input.input.is_empty() {
-            return Err(LatexError::LatexError("No input files provided.".into()));
-        }
 
         // apply the templating and create resources in the working dir
         for (name, buf) in &input.input {

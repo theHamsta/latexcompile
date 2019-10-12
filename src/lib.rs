@@ -322,7 +322,9 @@ impl LatexCompiler {
         for (name, buf) in &input.input {
             let transformed_buf = self.tp.process_placeholders(buf, &self.dict)?;
             let path = self.get_result_path(PathBuf::from(name))?;
-            fs::write(path, transformed_buf).map_err(LatexError::Io)?;
+            if !path.exists() {
+                fs::write(path, transformed_buf).map_err(LatexError::Io)?;
+            }
         }
 
         assert!(options.capture_stdout);

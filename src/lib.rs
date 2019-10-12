@@ -170,6 +170,20 @@ impl LatexInput {
         }
         Ok(())
     }
+
+    #[allow(unused_must_use)]
+    pub fn from_lazy(s: &str, dest_path: &Path) -> LatexInput {
+        let mut input = LatexInput::new();
+        let path = PathBuf::from(s);
+        if !dest_path.join(&path).exists() {
+            if path.is_file() {
+                input.add_file(path);
+            } else if path.is_dir() {
+                input.add_folder(path);
+            }
+        }
+        input
+    }
 }
 
 /// Provide a simple From conversion for &str to latex input.

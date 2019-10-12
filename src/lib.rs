@@ -208,8 +208,10 @@ impl LatexInput {
         for path in paths {
             let p = path.map_err(LatexError::Input)?.path();
             if p.is_file() {
+                dbg!(&p);
                 input.add_file_lazy(p, dest_path)?;
             } else if p.is_dir() {
+                dbg!(&p);
                 input.add_folder_lazy(p, dest_path)?;
             }
         }

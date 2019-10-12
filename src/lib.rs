@@ -171,15 +171,46 @@ impl LatexInput {
         Ok(())
     }
 
+    pub fn add_file_lazy(&mut self, file: PathBuf, dest_path: &Path) -> Result<()> {
+        if file.is_file() {
+            match file.to_str() {
+                Some(name) => {
+                    if !dest_path.join(&file).exists() {
+                        let content = fs::read(&file).map_err(LatexError::Input)?;
+                        self.input.push((name.to_string(), content));
+                    }
+                }
+                None => {}
+            }
+        }
+        Ok(())
+    }
+
+    pub fn add_folder_lazy(&mut self, folder: PathBuf, dest_path: &Path) -> Result<()> {
+        if folder.is_dir() {
+            let paths = fs::read_dir(folder).map_err(LatexError::Input)?;
+
+            for path in paths {
+                let p = path.map_err(LatexError::Input)?.path();
+                if p.is_file() {
+                    self.add_file_lazy(p, dest_path)?;
+                } else if p.is_dir() {
+                    self.add_folder_lazy(p, dest_path)?;
+                }
+            }
+        }
+        Ok(())
+    }
+
     #[allow(unused_must_use)]
     pub fn from_lazy(s: &str, dest_path: &Path) -> LatexInput {
         let mut input = LatexInput::new();
         let path = PathBuf::from(s);
         if !dest_path.join(&path).exists() {
             if path.is_file() {
-                input.add_file(path);
+                input.add_file_lazy(path, dest_path);
             } else if path.is_dir() {
-                input.add_folder(path);
+                input.add_folder_lazy(path, dest_path);
             }
         }
         input
@@ -326,7 +357,7 @@ impl LatexCompiler {
         cmd
     }
 
-    pub fn run(&self, main: &str, input: &LatexInput, options: LatexRunOptions) -> Result<Vec<u8>> {
+    pub fn run(&self, main: &str, input: &LatexInput, options: LatexRunOptions) -> Result<PathBuf> {
         // check if input is empty
         if input.input.is_empty() {
             return Err(LatexError::LatexError("No input files provided.".into()));
@@ -350,10 +381,9 @@ impl LatexCompiler {
         }
 
         // get the output file
-        let mut pdf = PathBuf::from(main); //self.get_result_path(PathBuf::from(main))?;
+        let pdf = PathBuf::from(main); //self.get_result_path(PathBuf::from(main))?;
         let stem = PathBuf::from(pdf.file_stem().unwrap().to_str().unwrap());
-        pdf = self.working_dir.join(stem.with_extension("pdf"));
-        fs::read(pdf).map_err(LatexError::Io)
+        Ok(self.working_dir.join(stem.with_extension("pdf")))
     }
 
     /// Create the given path as subpath within the working directory.

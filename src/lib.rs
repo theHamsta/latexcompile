@@ -188,11 +188,13 @@ impl LatexInput {
     pub fn add_folder_lazy(&mut self, folder: PathBuf, dest_path: &Path) -> Result<()> {
         if folder.is_dir() {
             let dest_folder = dest_path.join(&folder);
+            dbg!(&dest_folder);
             if !&dest_folder.exists() {
                 match &dest_folder.parent() {
                     Some(p) => fs::create_dir_all(p).map_err(LatexError::Io)?,
                     None => (),
                 }
+                dbg!(&dest_folder.parent());
                 let _result =
                     ::symlink::symlink_dir(folder, dest_folder).map_err(LatexError::Io)?;
             }

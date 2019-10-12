@@ -57,8 +57,7 @@ use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
-pub use tempfile::{tempdir, TempDir};
-
+use tempfile::tempdir;
 
 pub struct LatexRunOptions {
     double_compilation: bool,
@@ -257,7 +256,7 @@ impl TemplateProcessor {
 /// }
 /// ```
 pub struct LatexCompiler {
-    working_dir: TempDir,
+    pub working_dir: PathBuf,
     cmd: Cmd,
     tp: TemplateProcessor,
     dict: TemplateDict,
@@ -270,7 +269,7 @@ impl LatexCompiler {
         let cmd = ("pdflatex".into(), vec!["-interaction=nonstopmode".into()]);
 
         Ok(LatexCompiler {
-            working_dir: dir,
+            working_dir: dir.path().to_path_buf(),
             cmd: cmd,
             tp: TemplateProcessor::new()?,
             dict: dict,
@@ -282,7 +281,7 @@ impl LatexCompiler {
     // }
 
     pub fn get_working_path(&self) -> &Path {
-        self.working_dir.path()
+        &self.working_dir
     }
 
     /// Overwrite the default command-line `pdflatex`
@@ -309,7 +308,7 @@ impl LatexCompiler {
         let mut cmd = Command::new(&self.cmd.0);
         cmd.args(&self.cmd.1)
             .arg(main_file)
-            .current_dir(self.working_dir.path());
+            .current_dir(&self.working_dir);
         cmd
     }
 
@@ -337,13 +336,13 @@ impl LatexCompiler {
         // get the output file
         let mut pdf = PathBuf::from(main); //self.get_result_path(PathBuf::from(main))?;
         let stem = PathBuf::from(pdf.file_stem().unwrap().to_str().unwrap());
-        pdf = self.working_dir.path().join(stem.with_extension("pdf"));
+        pdf = self.working_dir.join(stem.with_extension("pdf"));
         fs::read(pdf).map_err(LatexError::Io)
     }
 
     /// Create the given path as subpath within the working directory.
     fn get_result_path(&self, path: PathBuf) -> Result<PathBuf> {
-        let dir = self.working_dir.path();
+        let dir = &self.working_dir;
         let to_create = dir.join(path);
         match to_create.parent() {
             Some(p) => fs::create_dir_all(p).map_err(LatexError::Io)?,
